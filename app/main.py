@@ -26,6 +26,15 @@ CLASS_NAMES = ["rock", "paper", "scissors"]
 IMG_HEIGHT = 150
 IMG_WIDTH = 150
 
+# Prediction metrics
+metrics = {
+    "prediction_requests": 0,
+    "successful_predictions": 0,
+    "failed_predictions": 0,
+    "total_prediction_time": 0.0,
+    "predictions_by_class": {name: 0 for name in ["rock", "paper", "scissors"]}
+}
+
 # Load the trained model
 try:
     model = tf.keras.models.load_model(MODEL_PATH)
