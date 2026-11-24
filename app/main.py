@@ -63,7 +63,20 @@ def health_check():
     }
 
 
-# 3. Image prediction endpoint
+# 3. Metrics endpoint
+@app.get("/metrics")
+def get_metrics():
+    total = metrics["prediction_requests"]
+    avg_time = (
+        metrics["total_prediction_time"] / total if total > 0 else 0.0
+    )
+    return {
+        **metrics,
+        "average_prediction_time_seconds": round(avg_time, 4)
+    }
+
+
+# 4. Image prediction endpoint
 
 @app.post("/predict")
 async def predict(file: UploadFile = File(...)):
