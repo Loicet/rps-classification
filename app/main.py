@@ -25,6 +25,7 @@ MODEL_PATH = os.path.join(
 CLASS_NAMES = ["rock", "paper", "scissors"]
 IMG_HEIGHT = 150
 IMG_WIDTH = 150
+MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
 
 # Prediction metrics
 metrics = {
@@ -108,6 +109,12 @@ async def predict(file: UploadFile = File(...)):
 
     try:
         image_bytes = await file.read()
+
+        if len(image_bytes) > MAX_FILE_SIZE:
+            raise HTTPException(
+                status_code=400,
+                detail="File size exceeds the 5MB limit."
+            )
 
         image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
         image = image.resize((IMG_WIDTH, IMG_HEIGHT))
