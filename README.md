@@ -20,3 +20,9 @@ rps-classification/
 ├── dashboard.py       # Streamlit dashboard
 └── requirements.txt
 ```
+
+## Setup & Installation
+
+```bash
+pip install -r requirements.txt
+```
