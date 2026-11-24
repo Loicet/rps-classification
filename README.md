@@ -26,3 +26,13 @@ rps-classification/
 ```bash
 pip install -r requirements.txt
 ```
+
+## Running the App
+
+```bash
+# Start the FastAPI server
+uvicorn app.main:app --reload
+
+# Start the Streamlit dashboard
+streamlit run dashboard.py
+```
