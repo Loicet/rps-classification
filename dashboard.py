@@ -199,7 +199,64 @@ else:
     )
 
 # --------------------------------------------------
-# 7. FOOTER
+# 7. UPLOAD TRAINING DATA
+# --------------------------------------------------
+
+st.divider()
+
+st.subheader(":material/upload: Upload Training Data")
+
+st.write(
+    "Upload images to a specific class folder for training data collection."
+)
+
+class_name = st.selectbox(
+    "Select class",
+    ["rock", "paper", "scissors"]
+)
+
+uploaded_files = st.file_uploader(
+    "Choose images",
+    type=["jpg", "jpeg", "png"],
+    accept_multiple_files=True,
+    key="upload_data"
+)
+
+if uploaded_files:
+    if st.button(
+        "Upload Images",
+        type="primary",
+        use_container_width=True
+    ):
+        try:
+            with st.spinner("Uploading images..."):
+                response = requests.post(
+                    f"{API_URL}/upload-data/{class_name}",
+                    files=[
+                        ("files", (f.name, f.getvalue(), f.type))
+                        for f in uploaded_files
+                    ],
+                    timeout=60
+                )
+                response.raise_for_status()
+                result = response.json()
+
+            st.success(
+                f"Uploaded {result['uploaded_count']} image(s) to '{class_name}'."
+            )
+
+            if result["rejected_files"]:
+                st.warning("Some files were rejected:")
+                for rejected in result["rejected_files"]:
+                    st.caption(
+                        f"- {rejected['filename']}: {rejected['reason']}"
+                    )
+
+        except requests.exceptions.RequestException as error:
+            st.error(f"Upload failed: {error}")
+
+# --------------------------------------------------
+# 8. FOOTER
 # --------------------------------------------------
 
 st.divider()
