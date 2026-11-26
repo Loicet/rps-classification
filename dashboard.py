@@ -271,7 +271,61 @@ elif uploaded_files:
             st.error(f"Upload failed: {error}")
 
 # --------------------------------------------------
-# 8. FOOTER
+# 8. RETRAIN MODEL
+# --------------------------------------------------
+
+st.divider()
+
+st.subheader(":material/model_training: Retrain Model")
+
+st.write(
+    "Fine-tune the model using the uploaded training data. "
+    "The new model will only be promoted if it outperforms the current one."
+)
+
+if st.button(
+    "Start Retraining",
+    type="primary",
+    use_container_width=True
+):
+    try:
+        with st.spinner("Retraining in progress... this may take a moment."):
+            response = requests.post(
+                f"{API_URL}/retrain",
+                timeout=300
+            )
+            response.raise_for_status()
+            result = response.json()
+
+        if result["retraining_status"] == "promoted":
+            st.success(result["message"])
+        else:
+            st.warning(result["message"])
+
+        col1, col2, col3 = st.columns(3)
+
+        with col1:
+            st.metric(
+                label="Original Accuracy",
+                value=f"{result['original_validation_accuracy'] * 100:.2f}%"
+            )
+        with col2:
+            st.metric(
+                label="Candidate Accuracy",
+                value=f"{result['candidate_validation_accuracy'] * 100:.2f}%",
+                delta=f"{(result['candidate_validation_accuracy'] - result['original_validation_accuracy']) * 100:.2f}%"
+            )
+        with col3:
+            st.metric(
+                label="Training Images Used",
+                value=result["training_images"]
+            )
+
+    except requests.exceptions.RequestException as error:
+        st.error(f"Retraining request failed: {error}")
+
+# --------------------------------------------------
+# 9. FOOTER
 # --------------------------------------------------
 
 st.divider()
