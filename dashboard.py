@@ -215,6 +215,14 @@ class_name = st.selectbox(
     ["rock", "paper", "scissors"]
 )
 
+if "upload_done" not in st.session_state:
+    st.session_state["upload_done"] = False
+    st.session_state["upload_result"] = None
+
+if st.session_state["upload_done"]:
+    st.session_state["upload_done"] = False
+    st.rerun()
+
 uploaded_files = st.file_uploader(
     "Choose images",
     type=["jpg", "jpeg", "png"],
@@ -222,7 +230,18 @@ uploaded_files = st.file_uploader(
     key="upload_data"
 )
 
-if uploaded_files:
+if st.session_state["upload_result"]:
+    result = st.session_state["upload_result"]
+    st.success(
+        f"Uploaded {result['uploaded_count']} image(s) to '{result['class_name']}' successfully."
+    )
+    if result["rejected_files"]:
+        st.warning("Some files were rejected:")
+        for rejected in result["rejected_files"]:
+            st.caption(f"- {rejected['filename']}: {rejected['reason']}")
+    st.session_state["upload_result"] = None
+
+elif uploaded_files:
     if st.button(
         "Upload Images",
         type="primary",
@@ -241,16 +260,12 @@ if uploaded_files:
                 response.raise_for_status()
                 result = response.json()
 
-            st.success(
-                f"Uploaded {result['uploaded_count']} image(s) to '{class_name}'."
-            )
-
-            if result["rejected_files"]:
-                st.warning("Some files were rejected:")
-                for rejected in result["rejected_files"]:
-                    st.caption(
-                        f"- {rejected['filename']}: {rejected['reason']}"
-                    )
+            st.session_state["upload_result"] = {
+                **result,
+                "class_name": class_name
+            }
+            st.session_state["upload_done"] = True
+            st.rerun()
 
         except requests.exceptions.RequestException as error:
             st.error(f"Upload failed: {error}")
